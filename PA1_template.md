@@ -8,7 +8,8 @@ Programming Assignment 1
 
 # Data Loading and Prepping
 First, we load in lattice package for later use, and load data into 'activraw'
-```{r}
+
+```r
 library(lattice)
 activraw<-read.csv("activity.csv")
 ```
@@ -19,7 +20,8 @@ The first is called 'activ' and is split based off of the date levels (2nd colum
 
 The second one is called by 'activbytime' and is split based off of the created time
 levels(3rd column).
-```{r}
+
+```r
 activ<-split(activraw,activraw[,2])
 
 levels(activraw[,3])<-activraw[,3][!(duplicated(activraw[,3]))]
@@ -27,7 +29,8 @@ activbytime<-split(activraw,activraw[,3])
 ```
 # Means, Medians, and Maxima
 Then, we collect the mean of the steps each day and create a histogram using lattice. Notice that I created a function for the plot to use it again with cleaned data later on. 
-```{r}
+
+```r
 meanstep<-numeric()
 
 activhist<- function(activ) {
@@ -38,18 +41,34 @@ activhist<- function(activ) {
 }
 activhist(activ)
 ```
+
+![plot of chunk unnamed-chunk-3](figure/unnamed-chunk-3-1.png) 
 Afterwards, we collect the sum of each day and get its mean and median
-```{r}
+
+```r
 stepsum<-numeric()
 for (i in 1:length(activ)) {
         stepsum[i]<-sum(as.data.frame(activ[i])[,1], na.rm=TRUE)
 }
         
 mean(stepsum, na.rm=TRUE)
+```
+
+```
+## [1] 9354.23
+```
+
+```r
 quantile(stepsum,probs=.5,na.rm=TRUE)
 ```
+
+```
+##   50% 
+## 10395
+```
 Finally, we create a data frame. In the first column, we store the mean of steps taken within a certain 5 minute time period over every day The second column contains the time period this summary of values represents. We then plot this as a line plot using lattice.
-```{r}
+
+```r
 meantime<-data.frame()
 for (i in 1:length(activbytime)){
         meantime[i,1]<-mean(as.data.frame(activbytime[i])[,1],na.rm=TRUE)
@@ -58,18 +77,33 @@ for (i in 1:length(activbytime)){
 colnames(meantime)<-c("number_of_steps","time")
 xyplot(number_of_steps~time,data = meantime,type="l")
 ```
+
+![plot of chunk unnamed-chunk-5](figure/unnamed-chunk-5-1.png) 
 We then find the time interval  with the highest average number of steps recorded.
-```{r}
+
+```r
 for (i in 1:nrow(meantime)) {
         if (meantime[i,1] == max(meantime[,1])) {
                 return(meantime[i,2])
         }
 }
 ```
+
+```
+## [1] 835
+```
 # Accounting For Missing Values
 Since the data set has missing values, we want to take those days with missing values and replace them with averages. We start by calculating the total amount of missing values in the data set and then replacing them with the mean for the time interval they're supposed to represent. 
-```{r}
+
+```r
 sum(is.na(activraw))
+```
+
+```
+## [1] 2304
+```
+
+```r
 activclean<-activraw
 for (i in 1:nrow(activraw)) {
         if (is.na(activraw[i,1])) {
@@ -84,20 +118,38 @@ for (i in 1:nrow(activraw)) {
 activcl<-split(activclean,activclean[,2])
 ```
 Using the clean data, we remake the previous histogram and recalculate the mean and median. Notice that the mean and median are closer together (the same, in fact), which is to be expected.
-```{r}
-activhist(activcl)
 
+```r
+activhist(activcl)
+```
+
+![plot of chunk unnamed-chunk-8](figure/unnamed-chunk-8-1.png) 
+
+```r
 stepsumcl<-numeric()
 for (i in 1:length(activcl)) {
         stepsumcl[i]<-sum(as.data.frame(activcl[i])[,1])
 }
         
 mean(stepsumcl)
+```
+
+```
+## [1] 10766.19
+```
+
+```r
 quantile(stepsumcl,probs=.5)
+```
+
+```
+##      50% 
+## 10766.19
 ```
 # Weekdays
 From here we work on creating a factor of weekday or weekend and append it to 'activclean' data frame
-```{r}
+
+```r
 for (i in 1:nrow(activclean)) {
         if (weekdays(as.POSIXct(activclean[i,2])) %in%
                     c("Monday","Tuesday","Wednesday","Thursday","Friday")) {
@@ -109,7 +161,8 @@ for (i in 1:nrow(activclean)) {
 }
 ```
 From here, we split the clean data set by the weekday/weekend factor, and manipulate the now separate data to be split by time interval. We then take the average of each time interval for both data sets and remerge them into one. Finally, we plot the two line plots onto the same plot to easily compare the average steps per time interval on weekends versus the average steps per time interval on weekdays. 
-```{r}
+
+```r
 activclean[,4]<-as.factor(activclean[,4])
 activweek<-split(activclean,activclean[,4])
 
@@ -138,7 +191,8 @@ colnames(meantimeend)<-c("time","number_of_steps","day")
 
 meantimeweek<-merge(meantimeday,meantimeend,all=TRUE)
 xyplot(number_of_steps~time|day,data=meantimeweek,type="l",layout = c(1, 2))
-
 ```
+
+![plot of chunk unnamed-chunk-10](figure/unnamed-chunk-10-1.png) 
 
 
