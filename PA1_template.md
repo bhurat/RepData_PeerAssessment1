@@ -31,13 +31,13 @@ activbytime<-split(activraw,activraw[,3])
 Then, we collect the mean of the steps each day and create a histogram using lattice. Notice that I created a function for the plot to use it again with cleaned data later on. 
 
 ```r
-meanstep<-numeric()
+stepsum<-numeric()
 
 activhist<- function(activ) {
         for (i in 1:length(activ)) {
-                meanstep[i]<-mean(as.data.frame(activ[i])[,1],na.rm=TRUE)
+                stepsum[i]<-sum(as.data.frame(activ[i])[,1],na.rm=TRUE)
         }
-        histogram(meanstep,nint=12,col="deepskyblue4")
+        histogram(stepsum,nint=12,col="deepskyblue4")
 }
 activhist(activ)
 ```
